@@ -9,7 +9,8 @@ class Question(models.Model):
     list_display = ("id", "question_text", "pub_date")
 
     def was_published_recently(self) -> bool:
-        return self.pub_date >= (timezone.now() - datetime.timedelta(days=1))
+        now = timezone.now()
+        return now - datetime.timedelta(days=1) <= self.pub_date <= now
 
     def __repr__(self):
         fields_and_values = [
