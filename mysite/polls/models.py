@@ -27,5 +27,8 @@ class Choice(models.Model):
     choice_text = models.CharField(max_length=200)
     votes = models.IntegerField(default=0)
 
+    def add_new_votes(self, new_votes=1):
+        self.votes = models.F("votes") + new_votes
+
     def __str__(self):
         return self.choice_text
