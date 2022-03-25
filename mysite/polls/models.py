@@ -1,5 +1,7 @@
 import datetime
+
 from django.db import models
+from django.contrib import admin
 from django.utils import timezone
 
 
@@ -8,6 +10,11 @@ class Question(models.Model):
     pub_date = models.DateTimeField('date published')
     list_display = ("id", "question_text", "pub_date")
 
+    @admin.display(
+        boolean=True,
+        ordering="pub_date",
+        description="Published recently?"
+    )
     def was_published_recently(self) -> bool:
         now = timezone.now()
         return now - datetime.timedelta(days=1) <= self.pub_date <= now
