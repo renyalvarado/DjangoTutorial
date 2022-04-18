@@ -5,10 +5,19 @@ from django.contrib import admin
 from django.utils import timezone
 
 
+class CurrentQuestion(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            pub_date__lte=timezone.now()
+        ).order_by("-pub_date")
+
+
 class Question(models.Model):
     question_text = models.CharField(max_length=200)
     pub_date = models.DateTimeField('date published')
     list_display = ("id", "question_text", "pub_date")
+    object = models.Manager()
+    current_ones = CurrentQuestion()
 
     @admin.display(
         boolean=True,
