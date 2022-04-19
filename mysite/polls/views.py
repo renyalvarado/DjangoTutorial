@@ -1,3 +1,5 @@
+import logging
+
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -6,6 +8,8 @@ from rest_framework import viewsets
 
 from polls.services import Choice, Question, QuestionService
 from polls.serializers import QuestionSerializer
+
+logger = logging.getLogger(__name__)
 
 
 class QuestionViewSet(viewsets.ModelViewSet):
@@ -35,15 +39,19 @@ class ResultsViews(generic.DetailView):
 
 
 def vote(request, question_id):
+    logger.info(f"Voting for question_id: {question_id}")
     question = get_object_or_404(Question, pk=question_id)
     try:
-        selected_choice = question.choice_set.get(pk=request.POST["choice"])
+        choice = request.POST["choice"]
+        selected_choice = question.choice_set.get(pk=choice)
+        logger.info(f"Selected choice: {choice}")
         selected_choice.add_new_votes()
         selected_choice.save()
         return HttpResponseRedirect(
             reverse("polls:results", args=(question.id,))
         )
     except (KeyError, Choice.DoesNotExist):
+        logger.error(f"Choice does not exist: {choice}")
         return render(request, "polls/detail.html", {
             "question": question,
             "error_message": "You didn't select a choice.",
