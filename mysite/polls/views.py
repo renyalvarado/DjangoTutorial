@@ -2,8 +2,15 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic
+from rest_framework import viewsets
 
 from polls.services import Choice, Question, QuestionService
+from polls.serializers import QuestionSerializer
+
+
+class QuestionViewSet(viewsets.ModelViewSet):
+    queryset = QuestionService.get_current_questions_and_their_votes()
+    serializer_class = QuestionSerializer
 
 
 class IndexView(generic.ListView):
