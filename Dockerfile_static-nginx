@@ -1,0 +1,14 @@
+FROM python:3.8-slim as build
+
+ENV STATIC_ROOT "/static/"
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY mysite/ .
+RUN mkdir $STATIC_ROOT && python manage.py collectstatic --no-input
+
+FROM nginx:alpine
+WORKDIR /usr/share/nginx/html
+RUN rm -rf ./*
+COPY --from=build /static/ /usr/share/nginx/html/static
+ENTRYPOINT ["nginx", "-g", "daemon off;"]
