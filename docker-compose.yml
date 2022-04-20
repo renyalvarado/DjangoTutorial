@@ -1,0 +1,36 @@
+version: "3.3"
+
+services:
+  webapp:
+    build:
+      context: ./
+      dockerfile: Dockerfile_webapp
+    command: gunicorn mysite.wsgi:application --bind 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.webapp.rule=PathPrefix(`/`)"
+
+  traefik:
+    image: "traefik:v2.6"
+    container_name: "traefik"
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  static-nginx:
+    build:
+      context: ./
+      dockerfile: Dockerfile_static-nginx
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.static.rule=PathPrefix(`/static`)"
